@@ -35,12 +35,18 @@ export function headers({ loaderHeaders }: Route.HeadersArgs) {
 export default function Home() {
   const { data, filters } = useLoaderData<typeof loader>();
   const title = filters.tag ? `#${filters.tag}` : "精选";
+  const modules = webModules();
+  const layoutModule = modules.find((m) => m.homeLayout);
+  const HomeLayout = layoutModule?.homeLayout;
+  const moduleTop = modules.filter((m) => m !== layoutModule).map((m) => m.homeTop && <m.homeTop key={m.name} />);
+  const hot = data.hot ? <HotTopics entries={data.hot} /> : null;
+  const feed = <Timeline initial={data} filters={data.filters} />;
   return (
     <div className="pb-6">
       {/* Phones: the bar (精选 | 全部, filter, search), the filter in use, today's hot topics, the feed. */}
       <FeedBar base="/" category={filters.category} channel={filters.channel} />
       <ActiveFilters base="/" category={filters.category} channel={filters.channel} tag={filters.tag} />
-      {webModules().map((m) => m.homeTop && <m.homeTop key={m.name} />)}
+      {!HomeLayout && modules.map((m) => m.homeTop && <m.homeTop key={m.name} />)}
       <div className="hidden lg:block">
         <h1 className="text-[24px] font-semibold leading-[1.3] text-ink">{title}</h1>
         <div className="mb-5 mt-4 flex items-center justify-between gap-4">
@@ -49,9 +55,7 @@ export default function Home() {
         </div>
       </div>
 
-      {data.hot && <HotTopics entries={data.hot} />}
-
-      <Timeline initial={data} filters={data.filters} />
+      {HomeLayout ? <HomeLayout hot={hot} feed={feed} moduleTop={moduleTop} /> : <>{hot}{feed}</>}
     </div>
   );
 }
