@@ -30,6 +30,9 @@ export interface ItemRow {
   indexable: boolean;
   fact_id: number | null;
   source_name: string;
+  source_kind: "rss" | "web_list" | "json_list" | "x_search" | "mp_account" | "external";
+  source_tags: string[];
+  source_first_party: boolean;
   /** Participation mode of the source now (editorial, hot_signal, isolated). */
   source_mode: string;
   x_post: Record<string, any> | null;
@@ -46,7 +49,8 @@ export interface ItemRow {
 export const ITEM_COLUMNS = sql`
   p.article_id AS id, p.title, p.original_title, p.summary, p.reason, p.category, p.tags, p.score,
   p.selected, p.seat, p.channel, p.url, p.published_at, p.discovered_at, p.timeline_at, p.visibility,
-  p.body_mode, p.indexable, p.fact_id, s.name AS source_name, s.participation_mode AS source_mode,
+  p.body_mode, p.indexable, p.fact_id, s.name AS source_name, s.kind AS source_kind, s.tags AS source_tags,
+  (s.tier = 'T1') AS source_first_party, s.participation_mode AS source_mode,
   a.x_post, a.author, a.language,
   st.public_id::text AS story_public_id, st.title AS story_title,
   CASE WHEN p.channel = 'x' THEN tr.body_text END AS zh_text, qt.text_zh AS quoted_zh`;
@@ -145,7 +149,7 @@ export function toItemSummary(row: ItemRow): ItemSummary {
     originalTitle: row.original_title,
     summary: row.summary,
     reason: row.selected ? row.reason : null,
-    source: { name: publicSourceName(row.source_name) },
+    source: { name: publicSourceName(row.source_name), kind: row.source_kind, tags: row.source_tags ?? [], firstParty: row.source_first_party },
     links: { original: row.url },
     publishedAt: row.published_at?.toISOString() ?? null,
     discoveredAt: row.discovered_at.toISOString(),

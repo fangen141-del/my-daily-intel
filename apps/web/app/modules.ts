@@ -138,6 +138,8 @@ export interface WebModule {
   };
   /** Content inserted by the home page after its phone feed bar / active filters. */
   homeTop?: ComponentType;
+  /** Optional local compositor for the three major home blocks; the engine passes rendered nodes, so data flow stays unchanged. */
+  homeLayout?: ComponentType<{ hot: ReactNode; feed: ReactNode; moduleTop: ReactNode }>;
   /** Parts of every public page (root.tsx); the admin has its own chrome and gets none of them. */
   root?: {
     /** An inline script in <head>, after the theme's: it runs before the page paints. */

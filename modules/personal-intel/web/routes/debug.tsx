@@ -54,6 +54,7 @@ export default function RuleDebuggerPage(){
   const {id}=useParams();
   const config=usePersonalIntel();
   const topic=config.topics.find(t=>t.id===id);
+  const topicSources = topic?.sources ?? ["all"];
   const initial=topic ? expertRulesFor(topic) : null;
   const [rules,setRules]=useState<ExpertRules | null>(initial);
   const [items,setItems]=useState<FeedItemSummary[]>([]);
@@ -61,7 +62,7 @@ export default function RuleDebuggerPage(){
   const [error,setError]=useState("");
 
   useEffect(()=>{ if(topic) setRules(expertRulesFor(topic)); },[topic?.id]);
-  const results=useMemo(()=>rules ? items.map(item=>({item,match:evaluateRules(item,rules)})).sort((a,b)=>Number(b.match.matched)-Number(a.match.matched)||b.match.score-a.match.score) : [],[items,rules]);
+  const results=useMemo(()=>rules ? items.map(item=>({item,match:evaluateRules(item,rules,topicSources)})).sort((a,b)=>Number(b.match.matched)-Number(a.match.matched)||b.match.score-a.match.score) : [],[items,rules,topicSources]);
   const hits=results.filter(x=>x.match.matched);
   const misses=results.filter(x=>!x.match.matched);
 

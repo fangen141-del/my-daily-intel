@@ -5,6 +5,10 @@ import type { CategoryKey, ChannelKey } from "./taxonomy.ts";
 export interface SourceRef {
   /** The name readers see (publication/rules.ts publicSourceName), as is every source name here. */
   name: string;
+  /** Safe public source metadata used for personal filtering; never includes collection URLs or admin config. */
+  kind?: "rss" | "web_list" | "json_list" | "x_search" | "mp_account" | "external";
+  tags?: string[];
+  firstParty?: boolean;
 }
 
 export interface MediaView {

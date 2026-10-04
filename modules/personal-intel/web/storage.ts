@@ -36,10 +36,19 @@ export interface FocusTopic {
   updatedAt: string;
 }
 
+export type HomeModuleKey = "focus" | "hot" | "feed";
+export interface HomeLayoutPrefs {
+  order: HomeModuleKey[];
+  hidden: HomeModuleKey[];
+  focusSize: "compact" | "normal";
+  focusCount: 2 | 4 | 6 | 8;
+}
+
 export interface PersonalIntelConfig {
   version: 1;
   preset: "comprehensive" | "investor" | "founder" | "technology" | "custom";
   topics: FocusTopic[];
+  home?: HomeLayoutPrefs;
 }
 
 const KEY = "dailyintel:personal-intel:v1";
@@ -173,6 +182,31 @@ function subscribe(cb: () => void) {
 let serverSnapshot: PersonalIntelConfig = { version: 1, preset: "comprehensive", topics: [] };
 export function usePersonalIntel(): PersonalIntelConfig {
   return useSyncExternalStore(subscribe, read, () => serverSnapshot);
+}
+
+const DEFAULT_HOME: HomeLayoutPrefs = { order: ["focus", "hot", "feed"], hidden: [], focusSize: "normal", focusCount: 8 };
+
+export function homeLayoutFor(config: PersonalIntelConfig): HomeLayoutPrefs {
+  const raw = config.home;
+  if (!raw) return DEFAULT_HOME;
+  const allowed: HomeModuleKey[] = ["focus", "hot", "feed"];
+  const order = [...raw.order.filter((x): x is HomeModuleKey => allowed.includes(x)), ...allowed.filter(x => !raw.order.includes(x))];
+  return {
+    order,
+    hidden: raw.hidden.filter((x): x is HomeModuleKey => allowed.includes(x)),
+    focusSize: raw.focusSize === "compact" ? "compact" : "normal",
+    focusCount: [2,4,6,8].includes(raw.focusCount) ? raw.focusCount : 8,
+  };
+}
+
+export function updateHomeLayout(prefs: HomeLayoutPrefs) {
+  const c = read();
+  writeConfig({ ...c, home: prefs });
+}
+
+export function resetHomeLayout() {
+  const c = read();
+  writeConfig({ ...c, home: DEFAULT_HOME });
 }
 
 export function updateExpertRules(id: string, expert: ExpertRules) {

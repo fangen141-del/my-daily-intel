@@ -3,11 +3,11 @@ import { usePersonalIntel } from "./storage.ts";
 
 const stars = (n:number) => "★".repeat(n) + "☆".repeat(5 - n);
 
-export default function HomeFocus() {
+export default function HomeFocus({ count = 8, size = "normal" }: { count?: number; size?: "compact" | "normal" }) {
   const { pathname } = useLocation();
   const config = usePersonalIntel();
   if (pathname !== "/") return null;
-  const topics = config.topics.filter(t => t.enabled).sort((a,b) => b.importance - a.importance).slice(0,8);
+  const topics = config.topics.filter(t => t.enabled).sort((a,b) => b.importance - a.importance).slice(0,count);
   if (!topics.length) return null;
   return (
     <section className="mb-5 lg:mb-6" aria-labelledby="my-focus-title">
@@ -18,9 +18,9 @@ export default function HomeFocus() {
         </div>
         <Link to="/focus" className="text-[12.5px] text-ink-3 transition-colors hover:text-accent">查看全部</Link>
       </div>
-      <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+      <div className={size === "compact" ? "grid grid-cols-2 gap-2 md:grid-cols-4" : "grid grid-cols-2 gap-2 md:grid-cols-4"}>
         {topics.map(t => (
-          <Link key={t.id} to={"/focus/"+encodeURIComponent(t.id)} className="card card-hover min-w-0 px-3 py-3">
+          <Link key={t.id} to={"/focus/"+encodeURIComponent(t.id)} className={"card card-hover min-w-0 " + (size === "compact" ? "px-3 py-2.5" : "px-3 py-3.5")}>
             <div className="truncate text-[14px] font-semibold text-ink">{t.name}</div>
             <div className="mt-1.5 text-[11px] text-amber-ink" aria-label={"重要度 "+t.importance+" 星"}>{stars(t.importance)}</div>
             <div className="mt-1.5 truncate text-[11.5px] text-ink-4">{t.keywords.slice(0,3).join(" · ") || "尚未设置关键词"}</div>
