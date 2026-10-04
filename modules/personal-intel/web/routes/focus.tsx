@@ -26,7 +26,7 @@ export default function FocusPage() {
           <article id={t.id} key={t.id} className={"card px-4 py-4 " + (t.enabled ? "" : "opacity-60")}>
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <h2 className="truncate text-[16px] font-semibold text-ink">{t.name}</h2>
+                <h2 className="truncate text-[16px] font-semibold text-ink"><Link to={"/focus/"+encodeURIComponent(t.id)} className="hover:text-accent">{t.name}</Link></h2>
                 <div className="mt-1 text-[11.5px] text-amber-ink">{stars(t.importance)}</div>
               </div>
               <button onClick={() => toggleTopic(t.id)} className={"shrink-0 rounded-full px-2.5 py-1 text-[11.5px] " + (t.enabled ? "bg-ok-soft text-ok-ink" : "bg-bg-sunk text-ink-4")}>{t.enabled ? "已启用" : "已暂停"}</button>
@@ -38,7 +38,7 @@ export default function FocusPage() {
             {t.excludes.length > 0 && <div className="mt-3 text-[12px] leading-relaxed text-ink-4">排除：{t.excludes.join("、")}</div>}
             <div className="mt-4 flex items-center justify-between border-t border-line-soft pt-3 text-[11.5px] text-ink-4">
               <span>{t.sources.includes("all") ? "全部来源" : t.sources.length+" 类来源"}</span>
-              <span>{refreshLabel[t.refresh] ?? t.refresh}</span>
+              <span className="flex items-center gap-3"><span>{refreshLabel[t.refresh] ?? t.refresh}</span>{t.enabled && <Link to={"/focus/"+encodeURIComponent(t.id)} className="text-accent">查看今日情报 →</Link>}</span>
             </div>
           </article>
         ))}

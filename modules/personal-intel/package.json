@@ -6,12 +6,14 @@
   "exports": {
     "./module": "./module.ts",
     "./web": "./web.tsx",
-    "./web/*": "./web/*"
+    "./web/*": "./web/*",
+    "./server": "./server.ts"
   },
   "dependencies": {
     "@aihot/contracts": "*",
     "@aihot/web": "*",
     "react": "19.3.0",
-    "react-router": "8.4.0"
+    "react-router": "8.4.0",
+    "@aihot/backend": "*"
   }
 }
