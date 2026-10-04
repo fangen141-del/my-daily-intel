@@ -4,7 +4,7 @@ import type { Screen } from "@aihot/web/components/shell/screens";
 import { PhoneBar } from "@aihot/web/components/shell/PhoneBar";
 import {
   deleteTopic, exportConfig, importConfig, newTopic, replacePreset, upsertTopic, usePersonalIntel,
-  impactProfileFor, type FocusTopic, type ImpactProfile, type RefreshFrequency, type SourceType
+  focusKindFor, impactProfileFor, type FocusKind, type FocusTopic, type ImpactProfile, type RefreshFrequency, type SourceType
 } from "../storage.ts";
 
 export const handle: Screen = { tab: "me", name: "管理关注" };
@@ -22,9 +22,10 @@ function Editor({topic,onDone}:{topic:FocusTopic,onDone:()=>void}) {
   const [keywords,setKeywords] = useState(topic.keywords.join("\n"));
   const [excludes,setExcludes] = useState(topic.excludes.join("\n"));
   const [impact,setImpact] = useState<ImpactProfile>(impactProfileFor(topic));
+  const [kind,setKind] = useState<FocusKind>(focusKindFor(topic));
   const save=()=>{
     const now=new Date().toISOString();
-    upsertTopic({...v,name:v.name.trim(),keywords:split(keywords),excludes:split(excludes),impactProfile:impact,updatedAt:now});
+    upsertTopic({...v,name:v.name.trim(),kind,keywords:split(keywords),excludes:split(excludes),impactProfile:impact,updatedAt:now});
     onDone();
   };
   const chooseSource=(s:SourceType)=>{
@@ -36,6 +37,7 @@ function Editor({topic,onDone}:{topic:FocusTopic,onDone:()=>void}) {
   return <div className="card mt-4 p-4 lg:p-5">
     <div className="grid gap-4 lg:grid-cols-2">
       <label className="block"><span className="text-[12px] font-medium text-ink-3">主题名称</span><input value={v.name} onChange={e=>setV({...v,name:e.target.value})} className="mt-1.5 h-10 w-full rounded-control border border-line bg-field px-3 text-[14px] text-ink outline-none focus:border-accent" placeholder="例如：黄金" /></label>
+      <label className="block"><span className="text-[12px] font-medium text-ink-3">关注对象类型</span><select value={kind} onChange={e=>setKind(e.target.value as FocusKind)} className="mt-1.5 h-10 w-full rounded-control border border-line bg-field px-3 text-[14px] text-ink"><option value="topic">主题</option><option value="asset">资产</option><option value="fund">基金</option><option value="stock">股票</option><option value="company">公司</option><option value="person">人物</option><option value="country">国家</option><option value="industry">行业</option><option value="product">产品</option><option value="other">其他</option></select></label>
       <label className="block"><span className="text-[12px] font-medium text-ink-3">重要程度</span><select value={v.importance} onChange={e=>setV({...v,importance:Number(e.target.value) as FocusTopic["importance"]})} className="mt-1.5 h-10 w-full rounded-control border border-line bg-field px-3 text-[14px] text-ink"><option value={5}>★★★★★ 核心关注</option><option value={4}>★★★★ 重要</option><option value={3}>★★★ 一般</option><option value={2}>★★ 偶尔看看</option><option value={1}>★ 低优先级</option></select></label>
       <label className="block"><span className="text-[12px] font-medium text-ink-3">关键词（每行或逗号分隔）</span><textarea value={keywords} onChange={e=>setKeywords(e.target.value)} rows={5} className="mt-1.5 w-full rounded-control border border-line bg-field px-3 py-2 text-[13px] leading-relaxed text-ink outline-none focus:border-accent" placeholder={"黄金\n金价\nGold\nCOMEX Gold"} /></label>
       <label className="block"><span className="text-[12px] font-medium text-ink-3">排除词</span><textarea value={excludes} onChange={e=>setExcludes(e.target.value)} rows={5} className="mt-1.5 w-full rounded-control border border-line bg-field px-3 py-2 text-[13px] leading-relaxed text-ink outline-none focus:border-accent" placeholder={"黄金首饰\n珠宝广告"} /></label>
