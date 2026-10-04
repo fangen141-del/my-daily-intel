@@ -1,6 +1,6 @@
-import { defineWebModule } from "../../apps/web/app/modules";
-import { IconHeart } from "../../apps/web/app/components/icons";
-import HomeFocus from "./HomeFocus";
+import { defineWebModule } from "@aihot/web/modules";
+import { IconHeart } from "@aihot/web/components/icons";
+import HomeFocus from "./web/HomeFocus.tsx";
 
 export default defineWebModule({
   name: "personal-intel",
