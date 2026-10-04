@@ -1,6 +1,101 @@
 {
-  "$comment": "示范信源：首次启动时导入（scripts/seed.ts），已存在的不会被覆盖。之后在后台“信源”里新建、修改和暂停。字段说明见 docs/customize.md。",
+  "$comment": "正式信源：首次启动时导入（scripts/seed.ts），已存在的不会被覆盖。中国大陆官方源先使用已验证 URL 规律；其他候选见 docs/my-daily-intel/MAINLAND_SOURCES.md。字段说明见 docs/customize.md。",
   "sources": [
+    {
+      "id": "web-cn-stats-latest",
+      "name": "国家统计局 · 最新发布",
+      "kind": "web_list",
+      "config": {
+        "url": "https://www.stats.gov.cn/szst/",
+        "parseMode": "html",
+        "allowUrlPrefixes": [
+          "https://www.stats.gov.cn/sj/zxfb/"
+        ],
+        "detail": {
+          "maxFetches": 20
+        },
+        "_aihot": {
+          "initialBackfillLimit": 12
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 60,
+      "tags": [
+        "官方",
+        "政府",
+        "财经",
+        "数据"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "web-cn-ndrc-news",
+      "name": "国家发展改革委 · 新闻发布",
+      "kind": "web_list",
+      "config": {
+        "url": "https://www.ndrc.gov.cn/xwdt/xwfb/",
+        "parseMode": "html",
+        "allowUrlPrefixes": [
+          "https://www.ndrc.gov.cn/xwdt/xwfb/"
+        ],
+        "detail": {
+          "publishedAtRegex": "发布时间[:：]\\\\s*(\\\\d{4}/\\\\d{2}/\\\\d{2})",
+          "publishedAtUtcOffset": "+08:00",
+          "maxFetches": 20
+        },
+        "_aihot": {
+          "initialBackfillLimit": 12
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 60,
+      "tags": [
+        "官方",
+        "政府",
+        "财经",
+        "政策"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "web-cn-csrc-news",
+      "name": "中国证监会 · 要闻",
+      "kind": "web_list",
+      "config": {
+        "url": "https://www.csrc.gov.cn/csrc/c100028/common_xq_list.shtml",
+        "parseMode": "html",
+        "allowUrlPrefixes": [
+          "https://www.csrc.gov.cn/csrc/c100028/"
+        ],
+        "detail": {
+          "publishedAtRegex": "日期[:：]\\\\s*(\\\\d{4}-\\\\d{2}-\\\\d{2})",
+          "publishedAtUtcOffset": "+08:00",
+          "maxFetches": 20
+        },
+        "_aihot": {
+          "initialBackfillLimit": 12
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 60,
+      "tags": [
+        "官方",
+        "政府",
+        "财经",
+        "监管",
+        "资本市场"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
     {
       "id": "rss-openai-news",
       "name": "OpenAI News",
