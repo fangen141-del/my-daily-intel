@@ -22,9 +22,7 @@ import { titled } from "./lib/seo";
 import { webModules } from "./site-modules";
 
 export const links: Route.LinksFunction = () => [
-  { rel: "icon", href: "/favicon.ico", sizes: "any" },
-  { rel: "icon", type: "image/png", href: "/icon.png" },
-  { rel: "apple-touch-icon", href: "/apple-icon.png" },
+  { rel: "icon", type: "image/svg+xml", href: "/logo.svg", sizes: "any" },
   { rel: "manifest", href: "/manifest.webmanifest" },
   { rel: "alternate", type: "application/rss+xml", title: `${SITE.name} — 精选`, href: "/feed.xml" },
 ];
