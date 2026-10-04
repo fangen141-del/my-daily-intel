@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router";
 import type { GroupReportsResponse, StoryDetail, TimelineCard, TimelineResponse } from "@aihot/contracts/site";
 import type { Screen } from "@aihot/web/components/shell/screens";
@@ -294,6 +294,6 @@ function IntelCard({event,rank,story,factSources,impactTarget,compact=false}:{ev
   return event.story ? <Link to={"/story/"+event.story.publicId} className="block h-full">{body}</Link> : <Link to={"/items/"+rep.card.item.id} className="block h-full">{body}</Link>;
 }
 
-function IntelRow({label,children}:{label:string;children:React.ReactNode}) {
+function IntelRow({label,children}:{label:string;children:ReactNode}) {
   return <div className="rounded-control bg-bg-sunk px-3 py-2.5 text-[12.5px] leading-relaxed"><div className="mb-1 text-[10.5px] font-semibold tracking-[0.06em] text-ink-4">{label}</div><div className="text-ink-2">{children}</div></div>;
 }
