@@ -28,6 +28,25 @@
 
 <br>
 
+## 我的每日情报台正式交付
+
+当前 fork 已完成 **Delivery v1.0.0** 母版级改造。正式使用请优先阅读：
+
+- [正式交付说明](docs/my-daily-intel/DELIVERY_V1.md)
+- [中国大陆部署](docs/my-daily-intel/DEPLOY_MAINLAND.md)
+- [首次部署检查表](docs/my-daily-intel/FIRST_DEPLOY_CHECKLIST.md)
+- [常见故障处理](docs/my-daily-intel/TROUBLESHOOTING.md)
+- [当前信源状态](docs/my-daily-intel/SOURCE_STATUS.md)
+
+本仓库部署时请克隆：
+
+```bash
+git clone https://github.com/fangen141-del/my-daily-intel.git
+cd my-daily-intel
+```
+
+下面保留 AIHOT 上游框架说明，便于后续维护和同步。
+
 ## 这是什么
 
 [AIHOT](https://aihot.news) 是我做的一个 AI 热点网站。它每天从一批信源里收资料，用大模型先筛一遍、再独立打两次分，挑出真正值得看的，写成中文标题和摘要；把不同来源说的同一件事聚成一个事件，按有多少人在说排出热点；每天早上出一份日报。
@@ -108,8 +127,8 @@
 需要 [Docker](https://docs.docker.com/get-docker/)，和一个 OpenAI 兼容的模型 API Key（DeepSeek、千问、智谱都可以）。
 
 ```bash
-git clone https://github.com/KKKKhazix/AIHOT.git myhot
-cd myhot
+git clone https://github.com/fangen141-del/my-daily-intel.git
+cd my-daily-intel
 node scripts/init-env.ts --llm-key <你的模型 API Key>
 docker compose up -d --build
 ```
@@ -153,6 +172,10 @@ docker compose up -d --build
 | [事件归组与关系评测](docs/grouping.md) | 事件关系怎么判断，怎么用自己的 pairwise gold set 评测 |
 | [部署](docs/deploy.md) | Docker、域名和 HTTPS、中国大陆、更新、备份、花多少钱 |
 | [我的每日情报台：中国大陆部署](docs/my-daily-intel/DEPLOY_MAINLAND.md) | 本仓库的大陆服务器部署、国内模型、首次启动与更新步骤 |
+| [正式交付说明](docs/my-daily-intel/DELIVERY_V1.md) | Delivery v1.0.0 的功能边界、部署入口和验收标准 |
+| [首次部署检查表](docs/my-daily-intel/FIRST_DEPLOY_CHECKLIST.md) | 第一次部署后逐项检查容器、采集、模型、事件和个人关注 |
+| [常见故障处理](docs/my-daily-intel/TROUBLESHOOTING.md) | 部署、采集、模型、数据库、信源和个人设置的排障方法 |
+| [当前信源状态](docs/my-daily-intel/SOURCE_STATUS.md) | 已正式接入、候选和交付后扩展的信源状态 |
 | [中国大陆信源候选](docs/my-daily-intel/MAINLAND_SOURCES.md) | 政策、宏观、监管、交易所及后续媒体信源的验证清单 |
 | [架构](docs/architecture.md) | 三个进程、几条不变的规则、目录、对外出口 |
 
