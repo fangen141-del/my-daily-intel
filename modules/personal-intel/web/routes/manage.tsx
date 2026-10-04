@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import type { Screen } from "@aihot/web/components/shell/screens";
 import {
   deleteTopic, exportConfig, importConfig, newTopic, replacePreset, upsertTopic, usePersonalIntel,
-  type FocusTopic, type RefreshFrequency, type SourceType
+  impactProfileFor, type FocusTopic, type ImpactProfile, type RefreshFrequency, type SourceType
 } from "../storage.ts";
 
 export const handle: Screen = { tab: "me", name: "管理关注" };
@@ -20,9 +20,10 @@ function Editor({topic,onDone}:{topic:FocusTopic,onDone:()=>void}) {
   const [v,setV] = useState(topic);
   const [keywords,setKeywords] = useState(topic.keywords.join("\n"));
   const [excludes,setExcludes] = useState(topic.excludes.join("\n"));
+  const [impact,setImpact] = useState<ImpactProfile>(impactProfileFor(topic));
   const save=()=>{
     const now=new Date().toISOString();
-    upsertTopic({...v,name:v.name.trim(),keywords:split(keywords),excludes:split(excludes),updatedAt:now});
+    upsertTopic({...v,name:v.name.trim(),keywords:split(keywords),excludes:split(excludes),impactProfile:impact,updatedAt:now});
     onDone();
   };
   const chooseSource=(s:SourceType)=>{
@@ -39,6 +40,10 @@ function Editor({topic,onDone}:{topic:FocusTopic,onDone:()=>void}) {
       <label className="block"><span className="text-[12px] font-medium text-ink-3">排除词</span><textarea value={excludes} onChange={e=>setExcludes(e.target.value)} rows={5} className="mt-1.5 w-full rounded-control border border-line bg-field px-3 py-2 text-[13px] leading-relaxed text-ink outline-none focus:border-accent" placeholder={"黄金首饰\n珠宝广告"} /></label>
     </div>
     <div className="mt-4"><div className="text-[12px] font-medium text-ink-3">信息来源</div><div className="mt-2 flex flex-wrap gap-2">{SOURCE_LABELS.map(([k,label])=><button type="button" key={k} onClick={()=>chooseSource(k)} className={"chip " + (v.sources.includes(k)?"border-accent bg-accent-soft text-accent":"")}>{label}</button>)}</div></div>
+    <div className="mt-4 grid gap-4 sm:grid-cols-2">
+      <label className="block"><span className="text-[12px] font-medium text-ink-3">影响对象名称</span><input value={impact.targetName} onChange={e=>setImpact({...impact,targetName:e.target.value})} className="mt-1.5 h-10 w-full rounded-control border border-line bg-field px-3 text-[14px] text-ink outline-none focus:border-accent" placeholder="例如：我的黄金基金" /></label>
+      <label className="block"><span className="text-[12px] font-medium text-ink-3">影响对象类型</span><select value={impact.targetKind} onChange={e=>setImpact({...impact,targetKind:e.target.value as ImpactProfile["targetKind"]})} className="mt-1.5 h-10 w-full rounded-control border border-line bg-field px-3 text-[14px] text-ink"><option value="topic">主题</option><option value="asset">资产</option><option value="fund">基金</option><option value="stock">股票</option><option value="company">公司</option><option value="person">人物</option><option value="country">国家</option><option value="industry">行业</option><option value="other">其他</option></select></label>
+    </div>
     <div className="mt-4 grid gap-4 sm:grid-cols-2">
       <label><span className="text-[12px] font-medium text-ink-3">刷新频率</span><select value={v.refresh} onChange={e=>setV({...v,refresh:e.target.value as RefreshFrequency})} className="mt-1.5 h-10 w-full rounded-control border border-line bg-field px-3 text-[14px] text-ink">{REFRESH.map(([k,l])=><option key={k} value={k}>{l}</option>)}</select></label>
       <label className="flex items-end"><button type="button" onClick={()=>setV({...v,enabled:!v.enabled})} className={"h-10 w-full rounded-control border px-3 text-[13px] font-medium "+(v.enabled?"border-ok bg-ok-soft text-ok-ink":"border-line bg-bg-sunk text-ink-3")}>{v.enabled?"当前：启用":"当前：暂停"}</button></label>

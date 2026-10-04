@@ -11,6 +11,14 @@ export interface ExpertRules {
   threshold: number;
 }
 
+export type ImpactDirection = "positive" | "neutral" | "negative" | "watch";
+export type ImpactStatus = "placeholder" | "manual" | "computed";
+
+export interface ImpactProfile {
+  targetName: string;
+  targetKind: "topic" | "asset" | "company" | "person" | "country" | "industry" | "fund" | "stock" | "other";
+}
+
 export interface FocusTopic {
   id: string;
   name: string;
@@ -21,6 +29,7 @@ export interface FocusTopic {
   refresh: RefreshFrequency;
   enabled: boolean;
   expert?: ExpertRules;
+  impactProfile?: ImpactProfile;
   createdAt: string;
   updatedAt: string;
 }
@@ -166,6 +175,15 @@ export function usePersonalIntel(): PersonalIntelConfig {
 export function updateExpertRules(id: string, expert: ExpertRules) {
   const c = read();
   writeConfig({ ...c, preset: "custom", topics: c.topics.map(t => t.id === id ? { ...t, expert, updatedAt: new Date().toISOString() } : t) });
+}
+
+export function impactProfileFor(topic: FocusTopic): ImpactProfile {
+  return topic.impactProfile ?? { targetName: topic.name, targetKind: "topic" };
+}
+
+export function updateImpactProfile(id: string, impactProfile: ImpactProfile) {
+  const c = read();
+  writeConfig({ ...c, preset: "custom", topics: c.topics.map(t => t.id === id ? { ...t, impactProfile, updatedAt: new Date().toISOString() } : t) });
 }
 
 export function expertRulesFor(topic: FocusTopic): ExpertRules {
