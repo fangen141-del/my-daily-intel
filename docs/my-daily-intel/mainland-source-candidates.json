@@ -1,0 +1,104 @@
+{
+  "updatedAt": "2026-10-04",
+  "note": "Candidates only. Preview in /admin/sources/new before adding to industry/sources.json.",
+  "sources": [
+    {
+      "id": "cn-gov-policy",
+      "name": "中国政府网 · 最新政策",
+      "url": "https://www.gov.cn/zhengce/",
+      "tier": "T1",
+      "tags": [
+        "官方",
+        "政府",
+        "政策"
+      ],
+      "interval_minutes": 60,
+      "status": "preview_required"
+    },
+    {
+      "id": "cn-stats-latest",
+      "name": "国家统计局 · 最新发布",
+      "url": "https://www.stats.gov.cn/szst/",
+      "tier": "T1",
+      "tags": [
+        "官方",
+        "政府",
+        "财经",
+        "数据"
+      ],
+      "interval_minutes": 60,
+      "status": "preview_required"
+    },
+    {
+      "id": "cn-ndrc-news",
+      "name": "国家发展改革委 · 新闻发布",
+      "url": "https://www.ndrc.gov.cn/xwdt/xwfb/",
+      "tier": "T1",
+      "tags": [
+        "官方",
+        "政府",
+        "财经",
+        "政策"
+      ],
+      "interval_minutes": 60,
+      "status": "preview_required"
+    },
+    {
+      "id": "cn-mof-policy",
+      "name": "财政部 · 政策发布",
+      "url": "https://www.mof.gov.cn/zhengwuxinxi/zhengcefabu/",
+      "tier": "T1",
+      "tags": [
+        "官方",
+        "政府",
+        "财经",
+        "政策"
+      ],
+      "interval_minutes": 60,
+      "status": "preview_required"
+    },
+    {
+      "id": "cn-csrc-news",
+      "name": "中国证监会 · 要闻",
+      "url": "https://www.csrc.gov.cn/csrc/c100028/common_xq_list.shtml",
+      "tier": "T1",
+      "tags": [
+        "官方",
+        "政府",
+        "财经",
+        "监管",
+        "资本市场"
+      ],
+      "interval_minutes": 60,
+      "status": "preview_required"
+    },
+    {
+      "id": "cn-szse-news",
+      "name": "深圳证券交易所 · 要闻",
+      "url": "https://www.szse.cn/aboutus/trends/news/",
+      "tier": "T1",
+      "tags": [
+        "官方",
+        "财经",
+        "交易所",
+        "资本市场"
+      ],
+      "interval_minutes": 60,
+      "status": "preview_required"
+    },
+    {
+      "id": "cn-szse-notice",
+      "name": "深圳证券交易所 · 通知公告",
+      "url": "https://www.szse.cn/www/disclosure/notice/general/",
+      "tier": "T1",
+      "tags": [
+        "官方",
+        "财经",
+        "交易所",
+        "公告"
+      ],
+      "interval_minutes": 60,
+      "status": "preview_required"
+    }
+  ]
+}
