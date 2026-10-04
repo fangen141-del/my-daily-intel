@@ -241,6 +241,11 @@ export default function FocusDetailPage() {
   const latest = useMemo(() => [...matched].sort((a,b)=>Date.parse(b.card.anchorAt)-Date.parse(a.card.anchorAt)),[matched]);
   const mediaReports = useMemo(() => latest.filter(x => x.card.item.channel === "news"), [latest]);
   const socialReports = useMemo(() => latest.filter(x => x.card.item.channel === "x"), [latest]);
+  const opinionReports = useMemo(() => latest.filter(x => x.card.item.category === "opinion"), [latest]);
+  const marketOpinionReports = useMemo(() => opinionReports.filter(x => {
+    const tags = x.card.item.source.tags ?? [];
+    return tags.some(tag => ["财经","金融"].includes(tag));
+  }), [opinionReports]);
   const officialReports = useMemo(() => {
     const seen = new Set<string>();
     const out = [];
@@ -310,6 +315,19 @@ export default function FocusDetailPage() {
             {socialReports.slice(0,8).map(({card})=><Link key={card.item.id} to={"/items/"+card.item.id} className="block border-b border-line-soft py-2.5 last:border-b-0"><div className="text-[11.5px] text-ink-4">{card.item.source.name} · {dayCN(card.anchorAt)}</div><div className="mt-1 text-[13px] font-medium leading-5 text-ink hover:text-accent">{card.item.summary ?? card.item.title}</div></Link>)}
           </SourceColumn>
         </div>
+      </section>
+
+      <section className="mt-7">
+        <div className="mb-3 flex items-baseline justify-between"><h2 className="text-[18px] font-semibold text-ink">观点与判断</h2><span className="text-[12px] text-ink-4">仅收录 AIHOT 已结构化为“观点”的材料</span></div>
+        <div className="grid gap-3 lg:grid-cols-2">
+          <SourceColumn title="媒体观点" count={opinionReports.length} empty="当前相关资讯中没有被结构化为“观点”的媒体材料。">
+            {opinionReports.slice(0,10).map(({card})=><Link key={card.item.id} to={"/items/"+card.item.id} className="block border-b border-line-soft py-2.5 last:border-b-0"><div className="text-[11.5px] text-ink-4">{card.item.source.name} · {dayCN(card.anchorAt)}</div><div className="mt-1 text-[13px] font-medium leading-5 text-ink">{card.item.title}</div>{card.item.summary&&<div className="mt-1 line-clamp-3 text-[12px] leading-relaxed text-ink-3">{card.item.summary}</div>}</Link>)}
+          </SourceColumn>
+          <SourceColumn title="市场观点" count={marketOpinionReports.length} empty="当前没有同时满足“观点类 + 财经/金融来源”的材料。">
+            {marketOpinionReports.slice(0,10).map(({card})=><Link key={card.item.id} to={"/items/"+card.item.id} className="block border-b border-line-soft py-2.5 last:border-b-0"><div className="text-[11.5px] text-ink-4">{card.item.source.name} · {dayCN(card.anchorAt)}</div><div className="mt-1 text-[13px] font-medium leading-5 text-ink">{card.item.title}</div>{card.item.summary&&<div className="mt-1 line-clamp-3 text-[12px] leading-relaxed text-ink-3">{card.item.summary}</div>}</Link>)}
+          </SourceColumn>
+        </div>
+        <p className="mt-2 text-[11.5px] leading-relaxed text-ink-4">这里展示的是来源自身的观点类材料，不等于系统立场，也不自动推导利好或利空。</p>
       </section>
 
       <section className="mt-7">
