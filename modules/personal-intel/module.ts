@@ -5,5 +5,6 @@ export default defineModule({
   pages: [
     { path: "focus", file: "web/routes/focus.tsx" },
     { path: "focus/manage", file: "web/routes/manage.tsx" },
+    { path: "focus/debug/:id", file: "web/routes/debug.tsx" },
   ],
 });
