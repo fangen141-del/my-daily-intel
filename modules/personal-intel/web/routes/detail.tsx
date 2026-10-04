@@ -4,9 +4,26 @@ import type { GroupReportsResponse, StoryDetail, TimelineCard, TimelineResponse 
 import type { Screen } from "@aihot/web/components/shell/screens";
 import { PhoneBar } from "@aihot/web/components/shell/PhoneBar";
 import { evaluateRules } from "../rules.ts";
-import { expertRulesFor, impactProfileFor, usePersonalIntel } from "../storage.ts";
+import { expertRulesFor, focusKindFor, impactProfileFor, usePersonalIntel, type RefreshFrequency } from "../storage.ts";
 
 export const handle: Screen = { tab: "me", name: "主题情报" };
+
+const REFRESH_MS: Record<RefreshFrequency, number | null> = {
+  realtime: 60_000,
+  hourly: 3_600_000,
+  "6h": 21_600_000,
+  daily: 86_400_000,
+  manual: null,
+};
+
+const REFRESH_LABEL: Record<RefreshFrequency, string> = {
+  realtime: "每分钟",
+  hourly: "每小时",
+  "6h": "每6小时",
+  daily: "每天",
+  manual: "手动",
+};
+
 
 interface StoryMap {
   factId: string;
@@ -146,6 +163,9 @@ export default function FocusDetailPage() {
   const topic = config.topics.find(t => t.id === id);
   const rules = topic ? expertRulesFor(topic) : null;
   const impact = topic ? impactProfileFor(topic) : null;
+  const focusKind = topic ? focusKindFor(topic) : "topic";
+  const [reloadToken,setReloadToken] = useState(0);
+  const [lastUpdated,setLastUpdated] = useState<string | null>(null);
   const [cards,setCards] = useState<TimelineCard[]>([]);
   const [mapping,setMapping] = useState<Map<string,StoryMap["story"]>>(new Map());
   const [storyDetails,setStoryDetails] = useState<Map<string,StoryDetail>>(new Map());
@@ -163,7 +183,7 @@ export default function FocusDetailPage() {
         const factIds = [...new Set(next.map(x => x.group?.factId).filter((x): x is string => !!x))];
         const map = await storyMapOf(factIds);
         if (!alive) return;
-        setCards(next); setMapping(map); setStatus("ready");
+        setCards(next); setMapping(map); setLastUpdated(new Date().toISOString()); setStatus("ready");
       } catch(e) {
         if (!alive) return;
         setError(e instanceof Error ? e.message : "读取失败"); setStatus("error");
@@ -171,7 +191,7 @@ export default function FocusDetailPage() {
     };
     void run();
     return () => { alive = false; };
-  }, [id]);
+  }, [id, reloadToken]);
 
   const matched = useMemo<MatchedCard[]>(() => {
     if (!rules) return [];
@@ -202,6 +222,17 @@ export default function FocusDetailPage() {
     void run();
     return () => { alive = false; };
   }, [eventKey]);
+
+  useEffect(() => {
+    if (!topic) return;
+    const ms = REFRESH_MS[topic.refresh];
+    if (!ms) return;
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible") setReloadToken(x => x + 1);
+    }, ms);
+    return () => window.clearInterval(timer);
+  }, [topic?.id, topic?.refresh]);
+
   const latest = useMemo(() => [...matched].sort((a,b)=>Date.parse(b.card.anchorAt)-Date.parse(a.card.anchorAt)),[matched]);
 
   if (!topic || !rules || !impact) return <div className="card p-6"><h1 className="text-[18px] font-semibold text-ink">找不到这个关注主题</h1><Link to="/focus" className="mt-3 inline-block text-[13px] text-accent">返回我的关注</Link></div>;
@@ -215,7 +246,9 @@ export default function FocusDetailPage() {
           <h1 className="mt-1 text-[24px] font-semibold text-ink">{topic.name} · 今日情报</h1>
           <p className="mt-2 max-w-2xl text-[13.5px] leading-relaxed text-ink-3">把与你有关的资讯先去重、再按事件聚合，同时区分事实、来源验证、系统分析和影响判断，减少重复信息和未经说明的推测。</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[11.5px] text-ink-4">{focusKind} · 刷新：{REFRESH_LABEL[topic.refresh]}{lastUpdated ? " · 最近 "+dayCN(lastUpdated) : ""}</span>
+          <button type="button" onClick={()=>setReloadToken(x=>x+1)} className="h-9 rounded-full border border-line-strong px-4 text-[13px] text-ink-2">立即刷新</button>
           <Link to={"/focus/debug/"+encodeURIComponent(topic.id)} className="h-9 rounded-full border border-line-strong px-4 py-2 text-[13px] text-ink-2">调试规则</Link>
           <Link to="/focus/manage" className="h-9 rounded-full border border-line-strong px-4 py-2 text-[13px] text-ink-2">管理主题</Link>
         </div>
