@@ -210,9 +210,9 @@ export default function FocusDetailPage() {
       <Link to="/focus" className="text-[12px] text-ink-4 hover:text-accent">← 我的关注</Link>
       <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="text-[11px] font-semibold tracking-[0.08em] text-accent">我的世界 · 事件聚合</div>
+          <div className="text-[11px] font-semibold tracking-[0.08em] text-accent">我的世界 · 专业情报</div>
           <h1 className="mt-1 text-[24px] font-semibold text-ink">{topic.name} · 今日情报</h1>
-          <p className="mt-2 max-w-2xl text-[13.5px] leading-relaxed text-ink-3">先按你的规则找出相关资讯，再沿用 AIHOT 的事实归组与事件关系，把重复报道和同一事件的连续进展合在一起。</p>
+          <p className="mt-2 max-w-2xl text-[13.5px] leading-relaxed text-ink-3">把与你有关的资讯先去重、再按事件聚合，同时区分事实、来源验证、系统分析和影响判断，减少重复信息和未经说明的推测。</p>
         </div>
         <div className="flex gap-2">
           <Link to={"/focus/debug/"+encodeURIComponent(topic.id)} className="h-9 rounded-full border border-line-strong px-4 py-2 text-[13px] text-ink-2">调试规则</Link>
@@ -228,23 +228,28 @@ export default function FocusDetailPage() {
       <div className="mt-5 grid grid-cols-3 gap-2 lg:max-w-xl">
         <Metric label="相关资讯" value={matched.length} />
         <Metric label="聚合事件" value={events.length} />
-        <Metric label="多源事件" value={events.filter(e=>e.reportCount>1).length} />
+        <Metric label="多源事件" value={events.filter(e => {
+          const story = e.story ? storyDetails.get(e.story.publicId) : undefined;
+          return story ? story.sourceCount > 1 : Math.max(0, ...e.factIds.map(id => factSources.get(id) ?? 0)) > 1;
+        }).length} />
       </div>
 
       <section className="mt-6">
-        <div className="mb-3 flex items-baseline justify-between"><h2 className="text-[18px] font-semibold text-ink">今日最重要</h2><span className="text-[12px] text-ink-4">按你的相关度规则排序</span></div>
-        {!events.length ? <Empty /> : <div className="space-y-3">{events.slice(0,5).map((event,index)=><EventCard key={event.key} event={event} rank={index+1} />)}</div>}
+        <div className="mb-3 flex items-baseline justify-between"><h2 className="text-[18px] font-semibold text-ink">今日最重要</h2><span className="text-[12px] text-ink-4">按相关度、证据和事件聚合结果阅读</span></div>
+        {!events.length ? <Empty /> : <div className="space-y-3">{events.slice(0,5).map((event,index)=><IntelCard key={event.key} event={event} rank={index+1} story={event.story?storyDetails.get(event.story.publicId):undefined} factSources={factSources} impactTarget={impact.targetName} />)}</div>}
       </section>
 
       <section className="mt-7">
-        <div className="mb-3 flex items-baseline justify-between"><h2 className="text-[18px] font-semibold text-ink">事件聚合</h2><span className="text-[12px] text-ink-4">同一事实、多家报道不再重复占位</span></div>
-        <div className="grid gap-3 lg:grid-cols-2">{events.map(event=><EventCard key={event.key} event={event} />)}</div>
+        <div className="mb-3 flex items-baseline justify-between"><h2 className="text-[18px] font-semibold text-ink">多方验证与事件聚合</h2><span className="text-[12px] text-ink-4">同一事实、多家报道不再重复占位</span></div>
+        <div className="grid gap-3 lg:grid-cols-2">{events.map(event=><IntelCard key={event.key} event={event} story={event.story?storyDetails.get(event.story.publicId):undefined} factSources={factSources} impactTarget={impact.targetName} compact />)}</div>
       </section>
 
       <section className="mt-7">
-        <div className="mb-3 flex items-baseline justify-between"><h2 className="text-[18px] font-semibold text-ink">最新消息</h2><span className="text-[12px] text-ink-4">{latest.length} 条相关资讯</span></div>
-        <div className="divide-y divide-line rounded-card border border-line bg-surface">
-          {latest.slice(0,40).map(({card,score})=><Link key={card.item.id} to={"/items/"+card.item.id} className="block px-4 py-3.5 transition-colors hover:bg-bg-sunk/60"><div className="flex items-start gap-3"><time className="mono w-[50px] shrink-0 pt-0.5 text-[11.5px] text-ink-4">{dayCN(card.anchorAt)}</time><div className="min-w-0 flex-1"><div className="text-[13.5px] font-medium leading-5 text-ink">{card.item.title}</div><div className="mt-1 text-[11.5px] text-ink-4">{card.item.source.name} · 相关度 {score}{card.group?.reportCount && card.group.reportCount>1 ? " · 同一事实 "+card.group.reportCount+" 篇报道" : ""}</div></div></div></Link>)}
+        <div className="mb-3 flex items-baseline justify-between"><h2 className="text-[18px] font-semibold text-ink">今日时间线</h2><span className="text-[12px] text-ink-4">{latest.length} 条与你相关的进展</span></div>
+        <div className="rounded-card border border-line bg-surface">
+          <ol className="relative ml-4 border-l border-line py-1">
+            {latest.slice(0,50).map(({card,score})=><li key={card.item.id} className="relative py-3 pl-5 pr-4"><span className="absolute -left-[4px] top-[20px] size-[7px] rounded-full bg-accent ring-4 ring-surface"/><div className="flex flex-wrap items-center gap-2 text-[11.5px] text-ink-4"><time className="mono">{dayCN(card.anchorAt)}</time><span>{card.item.source.name}</span><span>相关度 {score}</span>{card.group?.reportCount && card.group.reportCount>1 ? <span>同一事实 {card.group.reportCount} 篇报道</span> : null}</div><Link to={"/items/"+card.item.id} className="mt-1 block text-[13.5px] font-medium leading-5 text-ink hover:text-accent">{card.item.title}</Link></li>)}
+          </ol>
         </div>
       </section>
     </>}
