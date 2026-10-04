@@ -166,6 +166,7 @@ export default function FocusDetailPage() {
   const { id } = useParams();
   const config = usePersonalIntel();
   const topic = config.topics.find(t => t.id === id);
+  const topicSources = topic?.sources ?? ["all"];
   const rules = topic ? expertRulesFor(topic) : null;
   const impact = topic ? impactProfileFor(topic) : null;
   const focusKind = topic ? focusKindFor(topic) : "topic";
@@ -201,10 +202,10 @@ export default function FocusDetailPage() {
   const matched = useMemo<MatchedCard[]>(() => {
     if (!rules) return [];
     return cards
-      .map(card => ({ card, result: evaluateRules(card.item, rules, topic.sources) }))
+      .map(card => ({ card, result: evaluateRules(card.item, rules, topicSources) }))
       .filter(x => x.result.matched)
       .map(x => ({ card: x.card, score: x.result.score, reasons: x.result.reasons }));
-  }, [cards,rules]);
+  }, [cards,rules,topicSources]);
 
   const events = useMemo(() => buildEvents(matched, mapping), [matched,mapping]);
   const eventKey = useMemo(() => events.map(e => e.key).join("|"), [events]);
