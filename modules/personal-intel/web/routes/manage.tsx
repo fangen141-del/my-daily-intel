@@ -79,6 +79,7 @@ export default function ManageFocusPage(){
     <div className="mt-5 divide-y divide-line rounded-card border border-line bg-surface">
       {sorted.map(t=><div key={t.id} className="flex items-center gap-3 px-4 py-3.5">
         <div className="min-w-0 flex-1"><div className="flex items-center gap-2"><span className="truncate text-[14px] font-semibold text-ink">{t.name}</span>{!t.enabled&&<span className="rounded-full bg-bg-sunk px-2 py-0.5 text-[10px] text-ink-4">暂停</span>}</div><div className="mt-1 truncate text-[11.5px] text-ink-4">{"★".repeat(t.importance)} · {t.keywords.slice(0,5).join(" · ")}</div></div>
+        <Link to={"/focus/debug/"+encodeURIComponent(t.id)} className="text-[12.5px] text-ink-3 hover:text-accent">专家模式</Link>
         <button onClick={()=>setEditing(t)} className="text-[12.5px] text-accent">编辑</button>
         <button onClick={()=>{if(confirm("删除“"+t.name+"”？")) deleteTopic(t.id)}} className="text-[12.5px] text-hot">删除</button>
       </div>)}
