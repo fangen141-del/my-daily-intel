@@ -264,9 +264,11 @@ function Empty() {
   return <div className="card px-5 py-10 text-center"><div className="text-[14px] font-semibold text-ink">当前规则还没有命中资讯</div><p className="mt-1.5 text-[12.5px] text-ink-4">可以进入“调试规则”查看为什么没有命中。</p></div>;
 }
 
-function EventCard({event,rank}:{event:EventView;rank?:number}) {
+function IntelCard({event,rank,story,factSources,impactTarget,compact=false}:{event:EventView;rank?:number;story?:StoryDetail;factSources:Map<string,number>;impactTarget:string;compact?:boolean}) {
   const rep = [...event.cards].sort((a,b)=>b.score-a.score)[0]!;
-  const reason = rep.reasons.find(x=>x.startsWith("满足")||x.startsWith("命中")||x.startsWith("权重")) ?? ("相关度 "+rep.score);
+  const verification = verificationText(event, story, factSources);
+  const systemAnalysis = story?.digest ?? story?.summary ?? rep.card.item.reason ?? null;
+  const target = impactTarget || "当前关注对象";
   const body = <article className="card card-hover h-full px-4 py-4">
     <div className="flex items-start gap-3">
       {rank && <span className="num mt-0.5 w-5 shrink-0 text-[16px] font-semibold text-accent">{rank}</span>}
@@ -274,14 +276,24 @@ function EventCard({event,rank}:{event:EventView;rank?:number}) {
         <div className="flex flex-wrap items-center gap-2 text-[11px] text-ink-4">
           {event.story ? <span className="rounded-full bg-accent-soft px-2 py-0.5 text-accent">事件</span> : event.factIds.length ? <span className="rounded-full bg-bg-sunk px-2 py-0.5">同一事实</span> : <span className="rounded-full bg-bg-sunk px-2 py-0.5">单篇</span>}
           <span>{dayCN(event.latestAt)}</span>
-          <span>至少 {event.reportCount} 篇报道</span>
-          {event.factIds.length>1 && <span>{event.factIds.length} 个进展</span>}
+          <span>{verification}</span>
         </div>
         <h3 className="mt-2 text-[15.5px] font-semibold leading-6 text-ink">{event.title}</h3>
-        <p className="mt-2 text-[12.5px] leading-relaxed text-ink-3">与你相关：{reason}</p>
-        {event.cards.length>1 && <p className="mt-1.5 text-[11.5px] text-ink-4">已将 {event.cards.length} 条匹配资讯合并到这一事件下，避免重复阅读。</p>}
+        {!compact && <div className="mt-3 grid gap-2.5">
+          <IntelRow label="事实 / 已报道"><span>{rep.card.item.title}</span><span className="ml-1 text-ink-4">— {rep.card.item.source.name}</span></IntelRow>
+          <IntelRow label="媒体观点"><span className="text-ink-4">当前数据没有把媒体观点单独结构化；不把报道标题或系统摘要冒充媒体立场。</span></IntelRow>
+          <IntelRow label="系统分析"><span className={systemAnalysis?"":"text-ink-4"}>{systemAnalysis ?? "暂无结构化系统分析。"}</span></IntelRow>
+          <IntelRow label="为什么重要">{importantText(event, story)}</IntelRow>
+          <IntelRow label="来源验证"><span>{verification}</span>{story?.officialReports.length ? <span className="ml-1 text-ok-ink">· 有 {story.officialReports.length} 篇官方一手</span> : null}</IntelRow>
+          <IntelRow label="对我的影响"><span className="rounded-full bg-amber-soft px-2 py-0.5 text-amber-ink">待观察</span><span className="ml-2">对象：{target}。当前只确认“有关联”，尚未接入因果分析，因此不自动判断利好或利空。</span></IntelRow>
+        </div>}
+        {compact && <div className="mt-2 space-y-1.5 text-[12px] leading-relaxed text-ink-3"><p>为什么重要：{importantText(event, story)}</p><p>对 {target}：<span className="text-amber-ink">待观察</span></p></div>}
       </div>
     </div>
   </article>;
   return event.story ? <Link to={"/story/"+event.story.publicId} className="block h-full">{body}</Link> : <Link to={"/items/"+rep.card.item.id} className="block h-full">{body}</Link>;
+}
+
+function IntelRow({label,children}:{label:string;children:React.ReactNode}) {
+  return <div className="rounded-control bg-bg-sunk px-3 py-2.5 text-[12.5px] leading-relaxed"><div className="mb-1 text-[10.5px] font-semibold tracking-[0.06em] text-ink-4">{label}</div><div className="text-ink-2">{children}</div></div>;
 }
