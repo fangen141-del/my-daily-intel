@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import type { Screen } from "@aihot/web/components/shell/screens";
+import { PhoneBar } from "@aihot/web/components/shell/PhoneBar";
 import {
   deleteTopic, exportConfig, importConfig, newTopic, replacePreset, upsertTopic, usePersonalIntel,
   impactProfileFor, type FocusTopic, type ImpactProfile, type RefreshFrequency, type SourceType
@@ -68,7 +69,7 @@ export default function ManageFocusPage(){
     catch(e){ setNotice(e instanceof Error?e.message:"导入失败"); }
   };
 
-  return <div className="pb-8">
+  return <div className="pb-8"><PhoneBar back={{ to: "/focus", label: "我的关注" }} title="管理我的关注" />
     <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line pb-5">
       <div><Link to="/focus" className="text-[12px] text-ink-4 hover:text-accent">← 我的关注</Link><h1 className="mt-2 text-[24px] font-semibold text-ink">情报主题管理器</h1><p className="mt-2 max-w-2xl text-[13.5px] leading-relaxed text-ink-3">主题不写死在代码里。你可以自己添加、删除、暂停，并控制关键词、排除词、来源、优先级和刷新频率。</p></div>
       <button onClick={()=>setEditing(newTopic())} className="h-9 rounded-full bg-accent px-4 text-[13px] font-medium text-accent-contrast">+ 新建主题</button>
