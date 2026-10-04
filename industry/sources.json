@@ -2,6 +2,52 @@
   "$comment": "正式信源：首次启动时导入（scripts/seed.ts），已存在的不会被覆盖。中国大陆官方源先使用已验证 URL 规律；其他候选见 docs/my-daily-intel/MAINLAND_SOURCES.md。字段说明见 docs/customize.md。",
   "sources": [
     {
+      "id": "rss-sspai",
+      "name": "少数派",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://sspai.com/feed",
+        "_aihot": {
+          "initialBackfillLimit": 10
+        }
+      },
+      "tier": "T2",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 60,
+      "tags": [
+        "媒体",
+        "科技",
+        "产品",
+        "效率"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-ifanr",
+      "name": "爱范儿",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.ifanr.com/feed",
+        "_aihot": {
+          "initialBackfillLimit": 10
+        }
+      },
+      "tier": "T2",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 60,
+      "tags": [
+        "媒体",
+        "科技",
+        "产品",
+        "商业"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
       "id": "web-cn-stats-latest",
       "name": "国家统计局 · 最新发布",
       "kind": "web_list",
