@@ -136,6 +136,8 @@ export interface WebModule {
     /** Where the model prices are kept: the models page links its 未定价 there (routes/admin/models.tsx). */
     prices?: string;
   };
+  /** Content inserted by the home page after its phone feed bar / active filters. */
+  homeTop?: ComponentType;
   /** Parts of every public page (root.tsx); the admin has its own chrome and gets none of them. */
   root?: {
     /** An inline script in <head>, after the theme's: it runs before the page paints. */

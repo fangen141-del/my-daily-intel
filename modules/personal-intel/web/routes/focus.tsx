@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import type { Screen } from "@aihot/web/components/shell/screens";
+import { PhoneBar } from "@aihot/web/components/shell/PhoneBar";
 import { usePersonalIntel, toggleTopic } from "../storage.ts";
 
 export const handle: Screen = { tab: "me", name: "我的关注" };
@@ -12,6 +13,7 @@ export default function FocusPage() {
   const topics = [...config.topics].sort((a,b) => Number(b.enabled)-Number(a.enabled) || b.importance-a.importance || a.name.localeCompare(b.name,"zh-CN"));
   return (
     <div className="pb-8">
+      <PhoneBar title="我的关注" />
       <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line pb-5">
         <div>
           <div className="text-[11px] font-semibold tracking-[0.08em] text-accent">我的世界</div>

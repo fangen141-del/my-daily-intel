@@ -12,5 +12,5 @@ export default defineWebModule({
     { to: "/focus", label: "我的关注", icon: <IconHeart size={18} /> },
     { to: "/focus/manage", label: "管理我的关注", icon: <IconHeart size={18} /> },
   ],
-  root: { Top: HomeFocus },
+  homeTop: HomeFocus,
 });
