@@ -1,0 +1,29 @@
+name: Package Delivery
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/package-delivery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare package
+        run: |
+          mkdir -p dist/my-daily-intel-v1.0.0
+          rsync -a --exclude '.git' --exclude 'dist' ./ dist/my-daily-intel-v1.0.0/
+          printf '%s\n' '${{ github.sha }}' > dist/my-daily-intel-v1.0.0/DELIVERY_COMMIT
+      - name: Upload install package
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-daily-intel-v1.0.0-install-package
+          path: dist/my-daily-intel-v1.0.0
+          if-no-files-found: error
+          retention-days: 30
