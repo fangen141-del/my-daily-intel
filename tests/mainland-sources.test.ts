@@ -58,3 +58,19 @@ test("CSRC source keeps only commission-news article paths", () => {
     ["https://www.csrc.gov.cn/csrc/c100028/c7659506/content.shtml"]
   );
 });
+
+
+test("verified mainland tech media use direct RSS feeds", () => {
+  const cases = [
+    ["rss-sspai", "https://sspai.com/feed", ["媒体","科技"]],
+    ["rss-ifanr", "https://www.ifanr.com/feed", ["媒体","科技"]],
+  ] as const;
+  for (const [id, feedUrl, requiredTags] of cases) {
+    const s = data.sources.find(x => x.id === id);
+    assert.ok(s, "missing source " + id);
+    assert.equal(s.kind, "rss");
+    assert.equal((s.config as { feedUrl?: string }).feedUrl, feedUrl);
+    assert.equal(s.tier, "T2");
+    for (const tag of requiredTags) assert.ok(s.tags.includes(tag), id + " missing tag " + tag);
+  }
+});
