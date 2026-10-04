@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import type { FeedItemSummary, TimelineResponse } from "@aihot/contracts/site";
 import type { Screen } from "@aihot/web/components/shell/screens";
+import { PhoneBar } from "@aihot/web/components/shell/PhoneBar";
 import { evaluateRules } from "../rules.ts";
 import { expertRulesFor, updateExpertRules, usePersonalIntel, type ExpertRules } from "../storage.ts";
 
@@ -73,7 +74,7 @@ export default function RuleDebuggerPage(){
   };
   const save=()=>updateExpertRules(topic.id,rules);
 
-  return <div className="pb-8">
+  return <div className="pb-8"><PhoneBar back={{ to: "/focus", label: "我的关注" }} title="规则调试" />
     <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line pb-5">
       <div><Link to="/focus/manage" className="text-[12px] text-ink-4 hover:text-accent">← 情报主题管理器</Link><div className="mt-2 text-[11px] font-semibold tracking-[0.08em] text-accent">专家模式</div><h1 className="mt-1 text-[24px] font-semibold text-ink">{topic.name} · 规则调试</h1><p className="mt-2 max-w-2xl text-[13.5px] leading-relaxed text-ink-3">先定义什么必须出现、什么出现任意一个即可、什么必须排除，再用权重微调相关度。测试会直接读取今天的 AIHOT 精选资讯。</p></div>
       <button onClick={save} className="h-9 rounded-full bg-accent px-4 text-[13px] font-medium text-accent-contrast">保存规则</button>
