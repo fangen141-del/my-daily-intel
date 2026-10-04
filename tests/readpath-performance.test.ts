@@ -67,7 +67,13 @@ test('site cards omit unread payload while the detail retains its original body'
   const card = result.items.find((item) => item.id === id(1))!;
   assert.equal(card.title, `${T} needle`);
   assert.equal(card.summary, 'fixture summary');
-  assert.deepEqual(card.source, { name: 'Performance fixture' });
+  assert.equal(card.source.name, 'Performance fixture');
+  assert.equal(card.source.kind, 'rss');
+  assert.deepEqual(card.source.tags, []);
+  assert.equal(card.source.firstParty, true);
+  for (const field of ['config', 'url', 'feedUrl', 'health', 'id']) {
+    assert.ok(!(field in card.source), `site card source does not serialize ${field}`);
+  }
   for (const field of ['links', 'originalTitle', 'revision', 'discoveredAt', 'story']) {
     assert.ok(!(field in card), `site card does not serialize ${field}`);
   }
