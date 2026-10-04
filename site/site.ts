@@ -4,26 +4,26 @@
 
 export const SITE = {
   /** 站名：导航、页面标题、分享图、RSS、MCP、后台都用它。 */
-  name: "MyHOT",
+  name: "我的每日情报台",
   /**
    * 行业词：拼进默认说法里，比如“AI 日报”“AI 动态”。
    * 改成“法律”“HR”“黄金”之类，页面上就会变成“法律日报”“法律动态”。
    */
-  subject: "AI",
+  subject: "情报",
   /** 首页的完整标题（浏览器标签、搜索结果）。 */
-  homeTitle: "MyHOT — AI 行业动态 · 每日精选与日报",
+  homeTitle: "我的每日情报台 — 今天，我关注的事情发生了什么？",
   /** 主题目录页（/topics）的标题。 */
-  topicsTitle: "AI 主题：公司与模型、技术方向、内容形态的最新动态",
+  topicsTitle: "情报主题：市场、科技、公司、人物与公共事件的最新动态",
   /** 反馈表单输入框里的示例。 */
   feedbackExample: "例如：我在搜索某个关键词时遇到……我原本想……",
   /** 一句话介绍：搜索引擎、分享卡片、RSS、llms.txt 会用。 */
-  description: "自动盯住你挑的信源，用模型摘要、打分、精选，把同一件事的多篇报道归到一起，每天早上出一份日报。",
+  description: "持续收集、聚合、排序和去重公开信息，让你更快知道今天真正值得关注的事情发生了什么。",
   /** llms.txt 里一句话介绍下面的一段详细介绍（选填）。 */
   llmsIntro: null as string | null,
   /** 一行小字：分享图、海报下方。 */
-  tagline: "值得关注的 AI 动态",
+  tagline: "今天，我关注的事情发生了什么？",
   /** 搜索引擎读到的关键词（首页结构化数据）。 */
-  keywords: ["AI 资讯", "AI 新闻", "AI 日报", "AI 行业动态"] as string[],
+  keywords: ["每日情报", "热点聚合", "财经资讯", "科技资讯", "个人情报台", "新闻聚合"] as string[],
   /** 网站开始收录的年份（结构化数据的时间范围，选填）。 */
   since: null as string | null,
   /** 界面语言（HTML lang、og:locale）。 */
@@ -36,7 +36,7 @@ export const SITE = {
    * MCP 工具名的前缀（小写字母、数字、下划线），工具会叫 myhot_get_latest、myhot_search……
    * 已经有人接入后就不要再改。
    */
-  mcpPrefix: "myhot",
+  mcpPrefix: "dailyintel",
   /**
    * 公开接口（MCP、OpenAPI、llms.txt）的版本号，只升不降。
    * 改了接口里已有的字段或含义时升主版本，并在部署说明里写清。
@@ -45,19 +45,19 @@ export const SITE = {
   /** 对外联系邮箱（选填）：llms.txt、响应头里会写。 */
   contactEmail: null as string | null,
   /** 页脚的一行小字（选填）。 */
-  footerNote: "由 AIHOT 开源框架驱动",
+  footerNote: "基于 AIHOT 开源框架构建",
   /** 中国大陆网站的 ICP 备案号（选填），填了就显示在页脚并链接到工信部备案系统。 */
   icp: null as string | null,
   /** 源码的 GitHub 仓库地址（选填），填了就在侧栏底部和“我的”页底部显示“GitHub 开源”。 */
-  github: null as string | null,
+  github: "https://github.com/fangen141-del/my-daily-intel" as string | null,
   /** 结构化数据里的网站运营者（搜索引擎用）。 */
   organization: {
-    name: "MyHOT",
+    name: "我的每日情报台",
     /** 创始人（选填）。 */
     founder: null as null | { name: string; alternateName?: string; jobTitle?: string; description?: string; url?: string },
   },
   /** 抓取信源时报上的名字和版本（User-Agent 里用），不要冒用别的站。 */
-  crawlerName: "MyHOTBot/1.0",
+  crawlerName: "DailyIntelBot/1.0",
 } as const;
 
 /** 使用规则和隐私说明两页（正文在 pages/ 里）。 */
@@ -108,16 +108,16 @@ export const ABOUT = {
   /** 页面描述（搜索结果、分享卡片）。 */
   description: `关于 ${SITE.name}：${SITE.description}`,
   /** 大标题：第一行正常颜色，第二行强调色。 */
-  headline: ["AI 圈每天都有新动静，", "值得看的，只有几条。"] as [string, string],
+  headline: ["每天发生的事情很多，", "真正与你有关的，只有一部分。"] as [string, string],
   /** 标题下面的一段话。{sources} 会换成实时的信源数；统计没取到时换成 sourcesFallback。 */
-  lead: `${SITE.name} 替你盯着 {sources} 个信源：抓取、归并、打分、精选，每天早上 8 点出一份日报。免费，不用注册。`,
+  lead: `${SITE.name} 持续盯住 {sources} 个信源：抓取、归并、打分、精选，把同一件事放回同一个事件里，让你先看到真正重要的变化。`,
   sourcesFallback: "上百",
   /** 信源河动画下面的四个环节。 */
   steps: {
-    collect: "官方博客、媒体、X 账号、公众号和各类订阅源都在看；活跃的源 15 分钟就看一次。",
-    store: "抓到的都存下来，同一件事的报道归到一起；只计入热度的账号也算在内，热点榜就是从这里算出来的。",
-    select: "模型先看是不是这个行业的事、有没有实际信息，再写中文标题、摘要和推荐理由；营销稿和重复转发进不来。",
-    publish: "每天 08:00 出日报，周一出周报，每月 1 日出月报；最精选的几条可以推到飞书群。",
+    collect: "政府、官方机构、主流媒体、专业媒体、行业来源、社交平台和各类订阅源都可以纳入；活跃来源按设定频率持续更新。",
+    store: "抓到的资料进入统一信息池，同一件事的不同报道尽量归到一起；热点榜按事件而不是按重复文章计算。",
+    select: "模型先判断有没有实质信息、证据强弱和影响范围，再生成中文标题、摘要与推荐理由；营销稿、重复转述和低信息量内容会被压低。",
+    publish: "持续更新精选与热点，并按日、周、月生成摘要；个人关注能力会在此基础上进一步叠加，而不会替代公共热点。",
   },
   /**
    * 作者块（选填），null 就不显示。
@@ -150,7 +150,7 @@ export const ADMIN = {
 /** Agent 接入页的示例。 */
 export const AGENT = {
   /** MCP 工具表里“搜索”一行：能搜什么、可以怎么问。 */
-  search: { scope: "按公司、产品、人物或话题搜最近 7 天", ask: "这家公司最近发了什么？" },
+  search: { scope: "按公司、人物、资产、行业、国家或话题搜最近 7 天", ask: "我关注的这个对象最近发生了什么？" },
 };
 
 /** 日报、周报、月报版面上的小字。 */
