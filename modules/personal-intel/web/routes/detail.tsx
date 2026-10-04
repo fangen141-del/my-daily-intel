@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
-import type { FeedItemSummary, GroupInfo, TimelineCard, TimelineResponse } from "@aihot/contracts/site";
+import type { GroupReportsResponse, StoryDetail, TimelineCard, TimelineResponse } from "@aihot/contracts/site";
 import type { Screen } from "@aihot/web/components/shell/screens";
 import { evaluateRules } from "../rules.ts";
-import { expertRulesFor, usePersonalIntel } from "../storage.ts";
+import { expertRulesFor, impactProfileFor, usePersonalIntel } from "../storage.ts";
 
 export const handle: Screen = { tab: "me", name: "主题情报" };
 
@@ -94,6 +94,49 @@ function buildEvents(rows: MatchedCard[], mapping: Map<string, StoryMap["story"]
     }
   }
   return [...groups.values()].sort((a,b) => b.topScore - a.topScore || Date.parse(b.latestAt)-Date.parse(a.latestAt));
+}
+
+
+async function loadStoryDetails(events: EventView[]): Promise<Map<string, StoryDetail>> {
+  const ids = [...new Set(events.map(e => e.story?.publicId).filter((x): x is string => !!x))].slice(0, 30);
+  const rows = await Promise.all(ids.map(async id => {
+    const res = await fetch("/api/site/stories/" + encodeURIComponent(id));
+    if (!res.ok) return null;
+    return [id, await res.json() as StoryDetail] as const;
+  }));
+  return new Map(rows.filter((x): x is readonly [string, StoryDetail] => !!x));
+}
+
+async function loadFactSourceCounts(factIds: string[]): Promise<Map<string, number>> {
+  const rows = await Promise.all([...new Set(factIds)].slice(0, 80).map(async factId => {
+    const res = await fetch("/api/site/groups/" + encodeURIComponent(factId) + "/reports");
+    if (!res.ok) return [factId, 0] as const;
+    const data = await res.json() as GroupReportsResponse;
+    return [factId, new Set(data.reports.map(r => r.source.name)).size] as const;
+  }));
+  return new Map(rows);
+}
+
+function verificationText(event: EventView, story: StoryDetail | undefined, factSources: Map<string, number>): string {
+  if (story) {
+    if (story.officialReports.length > 0 && story.sourceCount >= 2) return "有官方一手；" + story.sourceCount + " 个来源交叉报道";
+    if (story.sourceCount >= 3) return story.sourceCount + " 个来源交叉报道";
+    if (story.sourceCount === 2) return "2 个来源交叉报道";
+    return "单一来源，尚未形成交叉验证";
+  }
+  const maxSources = Math.max(0, ...event.factIds.map(id => factSources.get(id) ?? 0));
+  if (maxSources >= 3) return maxSources + " 个来源报道同一事实";
+  if (maxSources === 2) return "2 个来源报道同一事实";
+  return event.reportCount > 1 ? event.reportCount + " 篇相关报道；来源交叉情况有限" : "单一报道，暂未交叉验证";
+}
+
+function importantText(event: EventView, story: StoryDetail | undefined): string {
+  const rep = [...event.cards].sort((a,b)=>b.score-a.score)[0]!;
+  const relation = rep.reasons.find(x=>x.startsWith("满足")||x.startsWith("命中")||x.startsWith("权重"));
+  const parts = [relation ? "与你的关注规则高度相关：" + relation : "与你的关注规则相关度为 " + rep.score];
+  if (story?.sourceCount && story.sourceCount > 1) parts.push("已有 " + story.sourceCount + " 个来源交叉报道");
+  if (story?.officialReports.length) parts.push("包含官方一手信息");
+  return parts.join("；") + "。";
 }
 
 export default function FocusDetailPage() {
