@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router";
 import type { GroupReportsResponse, StoryDetail, TimelineCard, TimelineResponse } from "@aihot/contracts/site";
 import type { Screen } from "@aihot/web/components/shell/screens";
+import { PhoneBar } from "@aihot/web/components/shell/PhoneBar";
 import { evaluateRules } from "../rules.ts";
 import { expertRulesFor, impactProfileFor, usePersonalIntel } from "../storage.ts";
 
@@ -205,7 +206,7 @@ export default function FocusDetailPage() {
 
   if (!topic || !rules || !impact) return <div className="card p-6"><h1 className="text-[18px] font-semibold text-ink">找不到这个关注主题</h1><Link to="/focus" className="mt-3 inline-block text-[13px] text-accent">返回我的关注</Link></div>;
 
-  return <div className="pb-8">
+  return <div className="pb-8"><PhoneBar back={{ to: "/focus", label: "我的关注" }} title="主题情报" />
     <div className="border-b border-line pb-5">
       <Link to="/focus" className="text-[12px] text-ink-4 hover:text-accent">← 我的关注</Link>
       <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
