@@ -3,6 +3,14 @@ import { useSyncExternalStore } from "react";
 export type SourceType = "all" | "news" | "finance" | "tech" | "social" | "self_media" | "government" | "official" | "research" | "custom";
 export type RefreshFrequency = "realtime" | "hourly" | "6h" | "daily" | "manual";
 
+export interface ExpertRules {
+  must: string[];
+  any: string[];
+  not: string[];
+  weights: Record<string, number>;
+  threshold: number;
+}
+
 export interface FocusTopic {
   id: string;
   name: string;
@@ -12,6 +20,7 @@ export interface FocusTopic {
   importance: 1 | 2 | 3 | 4 | 5;
   refresh: RefreshFrequency;
   enabled: boolean;
+  expert?: ExpertRules;
   createdAt: string;
   updatedAt: string;
 }
@@ -152,6 +161,15 @@ function subscribe(cb: () => void) {
 let serverSnapshot: PersonalIntelConfig = { version: 1, preset: "comprehensive", topics: [] };
 export function usePersonalIntel(): PersonalIntelConfig {
   return useSyncExternalStore(subscribe, read, () => serverSnapshot);
+}
+
+export function updateExpertRules(id: string, expert: ExpertRules) {
+  const c = read();
+  writeConfig({ ...c, preset: "custom", topics: c.topics.map(t => t.id === id ? { ...t, expert, updatedAt: new Date().toISOString() } : t) });
+}
+
+export function expertRulesFor(topic: FocusTopic): ExpertRules {
+  return topic.expert ?? { must: [], any: [...topic.keywords], not: [...topic.excludes], weights: {}, threshold: 1 };
 }
 
 export function newTopic(): FocusTopic {
