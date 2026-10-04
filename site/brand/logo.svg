@@ -1,1 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="116" fill="#13191c"/><path d="M256 92C271 199 313 241 420 256C313 271 271 313 256 420C241 313 199 271 92 256C199 241 241 199 256 92Z" fill="#2ce2e8"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="我的每日情报台">
+  <rect width="512" height="512" rx="116" fill="#13191c"/>
+  <circle cx="256" cy="256" r="142" fill="none" stroke="#2ce2e8" stroke-width="34"/>
+  <path d="M151 298h54V214h-54v84Zm78 0h54V164h-54v134Zm78 0h54v-58h-54v58Z" fill="#2ce2e8"/>
+  <circle cx="256" cy="256" r="18" fill="#faf9f6"/>
+</svg>
