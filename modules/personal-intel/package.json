@@ -6,7 +6,8 @@
   "exports": {
     "./module": "./module.ts",
     "./web": "./web.tsx",
-    "./web/*": "./web/*"
+    "./web/*": "./web/*",
+    "./server": "./server.ts"
   },
   "dependencies": {
     "@aihot/contracts": "*",
