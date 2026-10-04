@@ -1,0 +1,17 @@
+{
+  "name": "@aihot/personal-intel",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./module": "./module.ts",
+    "./web": "./web.tsx",
+    "./web/*": "./web/*"
+  },
+  "dependencies": {
+    "@aihot/contracts": "*",
+    "@aihot/web": "*",
+    "react": "19.3.0",
+    "react-router": "8.4.0"
+  }
+}
