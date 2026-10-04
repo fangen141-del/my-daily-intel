@@ -2,6 +2,7 @@ import { useSyncExternalStore } from "react";
 
 export type SourceType = "all" | "news" | "finance" | "tech" | "social" | "self_media" | "government" | "official" | "research" | "custom";
 export type RefreshFrequency = "realtime" | "hourly" | "6h" | "daily" | "manual";
+export type FocusKind = "topic" | "asset" | "fund" | "stock" | "company" | "person" | "country" | "industry" | "product" | "other";
 
 export interface ExpertRules {
   must: string[];
@@ -22,6 +23,7 @@ export interface ImpactProfile {
 export interface FocusTopic {
   id: string;
   name: string;
+  kind?: FocusKind;
   keywords: string[];
   excludes: string[];
   sources: SourceType[];
@@ -75,11 +77,12 @@ const presets: Record<Exclude<PersonalIntelConfig["preset"], "custom">, Array<[s
   ],
 };
 
-function topic(name:string, keywords:string[], importance:number): FocusTopic {
+function topic(name:string, keywords:string[], importance:number, kind: FocusKind = "topic"): FocusTopic {
   const now = new Date().toISOString();
   return {
     id: crypto.randomUUID(),
     name,
+    kind,
     keywords,
     excludes: [],
     sources: ["all"],
@@ -177,6 +180,10 @@ export function updateExpertRules(id: string, expert: ExpertRules) {
   writeConfig({ ...c, preset: "custom", topics: c.topics.map(t => t.id === id ? { ...t, expert, updatedAt: new Date().toISOString() } : t) });
 }
 
+export function focusKindFor(topic: FocusTopic): FocusKind {
+  return topic.kind ?? "topic";
+}
+
 export function impactProfileFor(topic: FocusTopic): ImpactProfile {
   return topic.impactProfile ?? { targetName: topic.name, targetKind: "topic" };
 }
@@ -192,5 +199,5 @@ export function expertRulesFor(topic: FocusTopic): ExpertRules {
 
 export function newTopic(): FocusTopic {
   const now = new Date().toISOString();
-  return { id: crypto.randomUUID(), name: "", keywords: [], excludes: [], sources: ["all"], importance: 3, refresh: "hourly", enabled: true, createdAt: now, updatedAt: now };
+  return { id: crypto.randomUUID(), name: "", kind: "topic", keywords: [], excludes: [], sources: ["all"], importance: 3, refresh: "hourly", enabled: true, createdAt: now, updatedAt: now };
 }

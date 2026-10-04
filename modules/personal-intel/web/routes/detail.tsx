@@ -4,9 +4,31 @@ import type { GroupReportsResponse, StoryDetail, TimelineCard, TimelineResponse 
 import type { Screen } from "@aihot/web/components/shell/screens";
 import { PhoneBar } from "@aihot/web/components/shell/PhoneBar";
 import { evaluateRules } from "../rules.ts";
-import { expertRulesFor, impactProfileFor, usePersonalIntel } from "../storage.ts";
+import { expertRulesFor, focusKindFor, impactProfileFor, usePersonalIntel, type RefreshFrequency } from "../storage.ts";
 
 export const handle: Screen = { tab: "me", name: "主题情报" };
+
+const REFRESH_MS: Record<RefreshFrequency, number | null> = {
+  realtime: 60_000,
+  hourly: 3_600_000,
+  "6h": 21_600_000,
+  daily: 86_400_000,
+  manual: null,
+};
+
+const REFRESH_LABEL: Record<RefreshFrequency, string> = {
+  realtime: "每分钟",
+  hourly: "每小时",
+  "6h": "每6小时",
+  daily: "每天",
+  manual: "手动",
+};
+
+const FOCUS_KIND_LABEL: Record<string, string> = {
+  topic: "主题", asset: "资产", fund: "基金", stock: "股票", company: "公司",
+  person: "人物", country: "国家", industry: "行业", product: "产品", other: "其他",
+};
+
 
 interface StoryMap {
   factId: string;
@@ -146,6 +168,9 @@ export default function FocusDetailPage() {
   const topic = config.topics.find(t => t.id === id);
   const rules = topic ? expertRulesFor(topic) : null;
   const impact = topic ? impactProfileFor(topic) : null;
+  const focusKind = topic ? focusKindFor(topic) : "topic";
+  const [reloadToken,setReloadToken] = useState(0);
+  const [lastUpdated,setLastUpdated] = useState<string | null>(null);
   const [cards,setCards] = useState<TimelineCard[]>([]);
   const [mapping,setMapping] = useState<Map<string,StoryMap["story"]>>(new Map());
   const [storyDetails,setStoryDetails] = useState<Map<string,StoryDetail>>(new Map());
@@ -163,7 +188,7 @@ export default function FocusDetailPage() {
         const factIds = [...new Set(next.map(x => x.group?.factId).filter((x): x is string => !!x))];
         const map = await storyMapOf(factIds);
         if (!alive) return;
-        setCards(next); setMapping(map); setStatus("ready");
+        setCards(next); setMapping(map); setLastUpdated(new Date().toISOString()); setStatus("ready");
       } catch(e) {
         if (!alive) return;
         setError(e instanceof Error ? e.message : "读取失败"); setStatus("error");
@@ -171,7 +196,7 @@ export default function FocusDetailPage() {
     };
     void run();
     return () => { alive = false; };
-  }, [id]);
+  }, [id, reloadToken]);
 
   const matched = useMemo<MatchedCard[]>(() => {
     if (!rules) return [];
@@ -202,7 +227,32 @@ export default function FocusDetailPage() {
     void run();
     return () => { alive = false; };
   }, [eventKey]);
+
+  useEffect(() => {
+    if (!topic) return;
+    const ms = REFRESH_MS[topic.refresh];
+    if (!ms) return;
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible") setReloadToken(x => x + 1);
+    }, ms);
+    return () => window.clearInterval(timer);
+  }, [topic?.id, topic?.refresh]);
+
   const latest = useMemo(() => [...matched].sort((a,b)=>Date.parse(b.card.anchorAt)-Date.parse(a.card.anchorAt)),[matched]);
+  const mediaReports = useMemo(() => latest.filter(x => x.card.item.channel === "news"), [latest]);
+  const socialReports = useMemo(() => latest.filter(x => x.card.item.channel === "x"), [latest]);
+  const officialReports = useMemo(() => {
+    const seen = new Set<string>();
+    const out = [];
+    for (const story of storyDetails.values()) {
+      for (const report of story.officialReports) {
+        if (seen.has(report.id)) continue;
+        seen.add(report.id);
+        out.push(report);
+      }
+    }
+    return out.sort((a,b)=>Date.parse(b.publishedAt)-Date.parse(a.publishedAt));
+  }, [storyDetails]);
 
   if (!topic || !rules || !impact) return <div className="card p-6"><h1 className="text-[18px] font-semibold text-ink">找不到这个关注主题</h1><Link to="/focus" className="mt-3 inline-block text-[13px] text-accent">返回我的关注</Link></div>;
 
@@ -215,7 +265,9 @@ export default function FocusDetailPage() {
           <h1 className="mt-1 text-[24px] font-semibold text-ink">{topic.name} · 今日情报</h1>
           <p className="mt-2 max-w-2xl text-[13.5px] leading-relaxed text-ink-3">把与你有关的资讯先去重、再按事件聚合，同时区分事实、来源验证、系统分析和影响判断，减少重复信息和未经说明的推测。</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[11.5px] text-ink-4">{FOCUS_KIND_LABEL[focusKind] ?? focusKind} · 刷新：{REFRESH_LABEL[topic.refresh]}{lastUpdated ? " · 最近 "+dayCN(lastUpdated) : ""}</span>
+          <button type="button" onClick={()=>setReloadToken(x=>x+1)} className="h-9 rounded-full border border-line-strong px-4 text-[13px] text-ink-2">立即刷新</button>
           <Link to={"/focus/debug/"+encodeURIComponent(topic.id)} className="h-9 rounded-full border border-line-strong px-4 py-2 text-[13px] text-ink-2">调试规则</Link>
           <Link to="/focus/manage" className="h-9 rounded-full border border-line-strong px-4 py-2 text-[13px] text-ink-2">管理主题</Link>
         </div>
@@ -246,6 +298,21 @@ export default function FocusDetailPage() {
       </section>
 
       <section className="mt-7">
+        <div className="mb-3 flex items-baseline justify-between"><h2 className="text-[18px] font-semibold text-ink">来源视角</h2><span className="text-[12px] text-ink-4">直接使用现有官方、媒体与社交数据分栏</span></div>
+        <div className="grid gap-3 lg:grid-cols-3">
+          <SourceColumn title="官方消息" count={officialReports.length} empty="当前相关事件里没有识别到官方一手报道。">
+            {officialReports.slice(0,8).map(r=><Link key={r.id} to={"/items/"+r.id} className="block border-b border-line-soft py-2.5 last:border-b-0"><div className="text-[11.5px] text-ink-4">{r.source.name} · {dayCN(r.publishedAt)}</div><div className="mt-1 text-[13px] font-medium leading-5 text-ink hover:text-accent">{r.title}</div></Link>)}
+          </SourceColumn>
+          <SourceColumn title="媒体报道" count={mediaReports.length} empty="当前规则没有命中媒体报道。">
+            {mediaReports.slice(0,8).map(({card})=><Link key={card.item.id} to={"/items/"+card.item.id} className="block border-b border-line-soft py-2.5 last:border-b-0"><div className="text-[11.5px] text-ink-4">{card.item.source.name} · {dayCN(card.anchorAt)}</div><div className="mt-1 text-[13px] font-medium leading-5 text-ink hover:text-accent">{card.item.title}</div></Link>)}
+          </SourceColumn>
+          <SourceColumn title="社交讨论" count={socialReports.length} empty="当前规则没有命中 X / 社交来源。">
+            {socialReports.slice(0,8).map(({card})=><Link key={card.item.id} to={"/items/"+card.item.id} className="block border-b border-line-soft py-2.5 last:border-b-0"><div className="text-[11.5px] text-ink-4">{card.item.source.name} · {dayCN(card.anchorAt)}</div><div className="mt-1 text-[13px] font-medium leading-5 text-ink hover:text-accent">{card.item.summary ?? card.item.title}</div></Link>)}
+          </SourceColumn>
+        </div>
+      </section>
+
+      <section className="mt-7">
         <div className="mb-3 flex items-baseline justify-between"><h2 className="text-[18px] font-semibold text-ink">今日时间线</h2><span className="text-[12px] text-ink-4">{latest.length} 条与你相关的进展</span></div>
         <div className="rounded-card border border-line bg-surface">
           <ol className="relative ml-4 border-l border-line py-1">
@@ -255,6 +322,13 @@ export default function FocusDetailPage() {
       </section>
     </>}
   </div>;
+}
+
+function SourceColumn({title,count,empty,children}:{title:string;count:number;empty:string;children:ReactNode}) {
+  return <section className="card px-4 py-4">
+    <div className="flex items-baseline justify-between gap-3"><h3 className="text-[14px] font-semibold text-ink">{title}</h3><span className="num text-[11.5px] text-ink-4">{count}</span></div>
+    <div className="mt-2">{count ? children : <p className="py-5 text-[12px] leading-relaxed text-ink-4">{empty}</p>}</div>
+  </section>;
 }
 
 function Metric({label,value}:{label:string;value:number}) {
