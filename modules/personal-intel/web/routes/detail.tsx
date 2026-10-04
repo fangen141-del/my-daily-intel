@@ -144,8 +144,11 @@ export default function FocusDetailPage() {
   const config = usePersonalIntel();
   const topic = config.topics.find(t => t.id === id);
   const rules = topic ? expertRulesFor(topic) : null;
+  const impact = topic ? impactProfileFor(topic) : null;
   const [cards,setCards] = useState<TimelineCard[]>([]);
   const [mapping,setMapping] = useState<Map<string,StoryMap["story"]>>(new Map());
+  const [storyDetails,setStoryDetails] = useState<Map<string,StoryDetail>>(new Map());
+  const [factSources,setFactSources] = useState<Map<string,number>>(new Map());
   const [status,setStatus] = useState<"loading"|"ready"|"error">("loading");
   const [error,setError] = useState("");
 
@@ -178,9 +181,29 @@ export default function FocusDetailPage() {
   }, [cards,rules]);
 
   const events = useMemo(() => buildEvents(matched, mapping), [matched,mapping]);
+  const eventKey = useMemo(() => events.map(e => e.key).join("|"), [events]);
+  useEffect(() => {
+    let alive = true;
+    if (!events.length) {
+      setStoryDetails(new Map());
+      setFactSources(new Map());
+      return;
+    }
+    const run = async () => {
+      const [stories, facts] = await Promise.all([
+        loadStoryDetails(events),
+        loadFactSourceCounts(events.flatMap(e => e.factIds)),
+      ]);
+      if (!alive) return;
+      setStoryDetails(stories);
+      setFactSources(facts);
+    };
+    void run();
+    return () => { alive = false; };
+  }, [eventKey]);
   const latest = useMemo(() => [...matched].sort((a,b)=>Date.parse(b.card.anchorAt)-Date.parse(a.card.anchorAt)),[matched]);
 
-  if (!topic || !rules) return <div className="card p-6"><h1 className="text-[18px] font-semibold text-ink">找不到这个关注主题</h1><Link to="/focus" className="mt-3 inline-block text-[13px] text-accent">返回我的关注</Link></div>;
+  if (!topic || !rules || !impact) return <div className="card p-6"><h1 className="text-[18px] font-semibold text-ink">找不到这个关注主题</h1><Link to="/focus" className="mt-3 inline-block text-[13px] text-accent">返回我的关注</Link></div>;
 
   return <div className="pb-8">
     <div className="border-b border-line pb-5">
