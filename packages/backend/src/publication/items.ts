@@ -30,6 +30,9 @@ export interface ItemRow {
   indexable: boolean;
   fact_id: number | null;
   source_name: string;
+  source_kind: "rss" | "web_list" | "json_list" | "x_search" | "mp_account" | "external";
+  source_tags: string[];
+  source_first_party: boolean;
   /** Participation mode of the source now (editorial, hot_signal, isolated). */
   source_mode: string;
   x_post: Record<string, any> | null;
@@ -145,7 +148,7 @@ export function toItemSummary(row: ItemRow): ItemSummary {
     originalTitle: row.original_title,
     summary: row.summary,
     reason: row.selected ? row.reason : null,
-    source: { name: publicSourceName(row.source_name) },
+    source: { name: publicSourceName(row.source_name), kind: row.source_kind, tags: row.source_tags ?? [], firstParty: row.source_first_party },
     links: { original: row.url },
     publishedAt: row.published_at?.toISOString() ?? null,
     discoveredAt: row.discovered_at.toISOString(),
