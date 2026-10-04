@@ -1,12 +1,13 @@
 import { Link } from "react-router";
 import type { Screen } from "@aihot/web/components/shell/screens";
 import { PhoneBar } from "@aihot/web/components/shell/PhoneBar";
-import { usePersonalIntel, toggleTopic } from "../storage.ts";
+import { focusKindFor, usePersonalIntel, toggleTopic } from "../storage.ts";
 
 export const handle: Screen = { tab: "me", name: "我的关注" };
 
 const stars = (n:number) => "★".repeat(n) + "☆".repeat(5-n);
 const refreshLabel: Record<string,string> = { realtime:"实时", hourly:"每小时", "6h":"每6小时", daily:"每天", manual:"手动" };
+const kindLabel: Record<string,string> = { topic:"主题", asset:"资产", fund:"基金", stock:"股票", company:"公司", person:"人物", country:"国家", industry:"行业", product:"产品", other:"其他" };
 
 export default function FocusPage() {
   const config = usePersonalIntel();
@@ -29,7 +30,7 @@ export default function FocusPage() {
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <h2 className="truncate text-[16px] font-semibold text-ink"><Link to={"/focus/"+encodeURIComponent(t.id)} className="hover:text-accent">{t.name}</Link></h2>
-                <div className="mt-1 text-[11.5px] text-amber-ink">{stars(t.importance)}</div>
+                <div className="mt-1 flex items-center gap-2 text-[11.5px]"><span className="text-amber-ink">{stars(t.importance)}</span><span className="rounded-full bg-bg-sunk px-2 py-0.5 text-ink-4">{kindLabel[focusKindFor(t)] ?? "主题"}</span></div>
               </div>
               <button onClick={() => toggleTopic(t.id)} className={"shrink-0 rounded-full px-2.5 py-1 text-[11.5px] " + (t.enabled ? "bg-ok-soft text-ok-ink" : "bg-bg-sunk text-ink-4")}>{t.enabled ? "已启用" : "已暂停"}</button>
             </div>
