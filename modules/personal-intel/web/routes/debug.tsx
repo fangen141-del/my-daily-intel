@@ -61,7 +61,7 @@ export default function RuleDebuggerPage(){
   const [error,setError]=useState("");
 
   useEffect(()=>{ if(topic) setRules(expertRulesFor(topic)); },[topic?.id]);
-  const results=useMemo(()=>rules ? items.map(item=>({item,match:evaluateRules(item,rules)})).sort((a,b)=>Number(b.match.matched)-Number(a.match.matched)||b.match.score-a.match.score) : [],[items,rules]);
+  const results=useMemo(()=>rules ? items.map(item=>({item,match:evaluateRules(item,rules,topic.sources)})).sort((a,b)=>Number(b.match.matched)-Number(a.match.matched)||b.match.score-a.match.score) : [],[items,rules,topic.sources]);
   const hits=results.filter(x=>x.match.matched);
   const misses=results.filter(x=>!x.match.matched);
 
