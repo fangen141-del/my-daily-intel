@@ -201,7 +201,7 @@ export default function FocusDetailPage() {
   const matched = useMemo<MatchedCard[]>(() => {
     if (!rules) return [];
     return cards
-      .map(card => ({ card, result: evaluateRules(card.item, rules) }))
+      .map(card => ({ card, result: evaluateRules(card.item, rules, topic.sources) }))
       .filter(x => x.result.matched)
       .map(x => ({ card: x.card, score: x.result.score, reasons: x.result.reasons }));
   }, [cards,rules]);
